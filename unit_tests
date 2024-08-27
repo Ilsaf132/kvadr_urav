@@ -1,0 +1,108 @@
+/*!
+\file
+\brief �������� ������
+
+������ ���� �������� �������, ������������ ��� �������� ������
+*/
+#include "unit_tests.h"
+#include "solve_sq.h"
+#include "comparison.h"
+#include "cons.h"
+#include <TXLib.h>
+#include <stdio.h>
+#include <math.h>
+#include <float.h>
+
+/**
+* @brief �������,���������� �����
+* @return �������� ������ ����� � ������� ��������
+*/
+int CheckingTests(char* argv[], int argc)
+{
+    assert(argv != NULL);
+    return CheckMassive(tests,SZ_TEST,argv, argc);
+}
+
+/**
+* @brief �������, ���������� ����� �� ��������
+* @param tests_f_check ������, ���������� ��������� � ������� ������
+* @param sz_test ���������� ������
+* @return ������������ ������ �����
+*/
+int CheckMassive(const struct Test tests_f_check[], int sz_test, char* argv[], int argc)
+{
+     assert(argv != NULL);
+     for (int i = 0; i < sz_test; ++i) {
+        if (!RTests(tests_f_check[i], argv, argc)) {
+            return error_false;
+        }
+     }
+     return error_right;
+}
+
+/**
+* @brief ������� �������� �����
+* @param pr ��������� �����
+* @return ������������/�������������� �����
+*/
+int RTests(struct Test pr, char* argv[], int argc)
+{
+    assert(argv != NULL);
+    struct Results test_res = {NAN, NAN, 0};
+    int clr = 0, e_res = 0;
+    SolveSquare(pr.kfTest,&test_res);
+    if (CheckConditionOfTests(test_res, pr))
+    {
+        if(IfColorAndResults(argv, argc, &clr, &e_res)) {
+            if (clr == 1 && e_res == 1) {
+                GREEN_CLR
+                TEST_SUCCESS
+                TEST_INF
+            } else if (clr == 1 && e_res == 0) {
+                GREEN_CLR
+                TEST_SUCCESS
+            } else if (clr == 0 && e_res == 1) {
+                TEST_SUCCESS
+                TEST_INF
+            } else if (clr == 0 && e_res == 0) {
+                TEST_SUCCESS
+            } else {
+                ERROR_ENT
+            }
+
+        } else {
+            ERROR_ENT
+        }
+        return error_right;
+
+    } else {
+        if (IfColorAndResults(argv, argc, &clr, &e_res)) {
+            if (clr == 1) {
+                RED_CLR
+            }
+            TEST_ERROR
+            TEST_INF
+            printf("Expected: x1 = %lf, x2 = %lf, numb_Roots = %d\n", pr.param.x1, pr.param.x2, pr.param.nRoots);
+            return error_false;
+        } else {
+        ERROR_ENT
+        }
+    }
+
+}
+
+/**
+* @brief �������, ����������� ���������� ���������� ����������� � ���������
+* @param test_res ��������� � ������������
+* @param pr ��������� � ��������� �������
+* @return ���������� ���������� ������ � ���������
+*/
+int CheckConditionOfTests (struct Results test_res, struct Test pr)
+{
+    return (test_res.nRoots == pr.param.nRoots) && ((ComparisonNumb(test_res.x1,pr.param.x1)
+    && ComparisonNumb(test_res.x2,pr.param.x2))
+    || (ComparisonNumb(test_res.x1,pr.param.x2) && ComparisonNumb(test_res.x2,pr.param.x1))) ;
+}
+
+
+
